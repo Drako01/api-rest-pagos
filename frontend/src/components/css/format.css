@@ -1,0 +1,79 @@
+:root{
+    /* Colores */
+    --colour-first: #ffffff;
+    --colour-second: #04395E;
+    --colour-third: #634133;
+    --colour-fourth: #04724D;
+    --colour-fifth: #ADA8B6;
+    /* Colores */
+    --first: #90A755;
+    --second: #f5f5f5;
+    --third: #3d4b19;
+    --fourth: #7d895d;
+    --gold: #464646;
+    --light: #eee;
+    --dark: #333;
+    --white: #eee;
+    --sweetdark: #cdcdcd;
+    --brick: #c93c20;
+    /* Tamaños */
+    --small: 200px;
+    --medium: 400px;
+    --large: 600px;
+    /* Tipografia */
+    --fontR: 'Roboto', sans-serif;
+    --fontP: 'Playfair', sans-serif;
+    --fontB: 'Barlow', sans-serif;
+    --fontA: 'Arual', sans-serif;
+    --fontAn: 'Anastas', sans-serif;
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+        monospace;
+}
+
+a{
+    text-decoration: none;
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+.swal2-popup{
+    margin-top: 8rem !important;
+    z-index: 1000 !important;
+}
+
+.line{
+    margin-top: 2rem;
+    width: calc(100% - 2rem);
+    height: 3px;
+    background-color: var(--colour-second);
+    border-radius: 50%;
+    box-shadow: 3px 5px 20px var(--colour-second);
+}
+.Titulo{
+    padding: 2rem 0;
+}
+.Titulo h1{
+    text-align: center;
+    font-weight: lighter;
+    font-weight: bold;
+    font-family: var(--fontR);
+    color: var(--colour-second);
+    font-size: max(1rem, calc(1rem + 1.5vw + 1.5vh));  
+}
+.swal2-container{
+    z-index: 10000;
+}

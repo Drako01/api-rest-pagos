@@ -1,0 +1,33 @@
+.App-header {
+    background-color: var(--colour-first);
+    min-height: 10vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: calc(10px + 2vmin);
+    color: var(--colour-second);
+    margin-top: 0;
+}
+
+.App-link {
+    color: var(--colour-second);
+}
+.DontView{
+    display: none;
+}
+
+li a.CartWidget{
+    margin: 1rem;
+}
+
+.CartWidget .Login{
+    margin-left: .5rem;
+}
+.None{
+    display: none !important;
+}
+.Signup{
+    font-size: 1rem;
+    text-align: right;
+}

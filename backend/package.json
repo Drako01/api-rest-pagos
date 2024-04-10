@@ -1,6 +1,24 @@
 {
+  "name": "backend-pagos",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Backend para E365 - Sistema de Pagos",
+  "main": "app.js",
+  "scripts": {
+    "test": "",
+    "dev": "node app",
+    "start": "nodemon app"
+  },
+  "author": "Alejandro Daniel Di Stefano",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Drako01/api-rest-pagos.git"
+  },
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jest": "^29.7.0",
     "jsonwebtoken": "^9.0.2",
@@ -9,6 +27,7 @@
     "passport-local": "^1.0.0",
     "pg": "^8.11.5",
     "sequelize": "^6.37.2",
-    "supertest": "^6.3.4"
+    "supertest": "^6.3.4",
+    "winston": "^3.13.0"
   }
 }

@@ -14,8 +14,7 @@
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+  background-color: #282c34;  
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -28,6 +27,12 @@
   color: #61dafb;
 }
 
+h1{
+  text-align: center !important;
+  font-size: 2rem !important;
+  margin-top: 2rem !important;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -36,3 +41,6 @@
     transform: rotate(360deg);
   }
 }
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
