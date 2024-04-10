@@ -1,0 +1,40 @@
+.Detalles{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 40vh;
+}
+.Detalles > div {
+    height: 2rem;
+}
+.Detalles h2{
+    padding: 1.5rem;
+    font-weight: bolder;
+    color: green;
+    font-size: 1.5rem;
+    text-align: center;
+    width: 100%;
+}
+.Detalles input {
+    margin-left: 3rem;
+    width: 200px;
+    background-color: #eeeeeec4;
+}
+.Info-Carga {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+.Boton,
+.Detalles button{
+    height: 2rem;
+    border-radius: .25rem;
+    background-color: bisque;
+    width: 100%;
+    margin-top: 2rem;
+}

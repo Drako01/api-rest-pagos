@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.js';
-import './Users.css';
+import { Titulo, Titular, UserList } from './StyledComponents'; 
 
 const Users = () => {
     const [users, setUsers] = useState([]);
-    const { authenticated  } = useAuth(); 
+    const { authenticated, userProfile } = useAuth(); 
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -30,25 +30,19 @@ const Users = () => {
 
     return (
         <>
-            {authenticated ? (
-                <>
-                    <section className='Titulo'>
-                        <h1 className='Titular'>Usuarios</h1>
-                    </section>
-                    <div className='UserList'>
-                        <h2 className='text-xl font-bold mb-4'>Listado de Usuarios</h2>
-                        <ul>
-                            {users.map(user => (
-                                <li key={user.id} className='mb-2'>{user.id} - {user.email}</li>
-                            ))}
-                        </ul>
-                    </div>
-                </>
-            ) : (
-                <section className='Titulo'>
-                    <h1 className='Titular'>No está autorizado</h1>
-                </section>
-            )}
+            <Titulo>
+                <Titular authenticated={authenticated}>Usuarios</Titular>
+            </Titulo>
+            <UserList>
+                <h2>Listado de Usuarios</h2>
+                <ul>
+                    {users.map(user => (
+                        <li key={user.id} className={user.email === userProfile?.email ? 'green' : ''}>
+                            {user.id} - {user.email}
+                        </li>
+                    ))}
+                </ul>
+            </UserList>
         </>
     );
 };

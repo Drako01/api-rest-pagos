@@ -5,7 +5,7 @@
   "description": "Backend para E365 - Sistema de Pagos",
   "main": "app.js",
   "scripts": {
-    "test": "",
+    "test": "jest",
     "dev": "node app",
     "start": "nodemon app"
   },
@@ -20,14 +20,17 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "jest": "^29.7.0",
     "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.1.0",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "pg": "^8.11.5",
     "sequelize": "^6.37.2",
-    "supertest": "^6.3.4",
     "winston": "^3.13.0"
+  },
+  "devDependencies": {
+    "esm": "^3.2.25",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.4"
   }
 }

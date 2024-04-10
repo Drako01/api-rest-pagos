@@ -4,6 +4,7 @@ import Login from '../Login/Login';
 import Users from '../Users/Users';
 import Pagos from '../Pagos/Pagos';
 import SignUp from '../SignUp/SignUp';
+import DetallePago from '../DetallePago/DetallePago';
 
 const Main = () => {
     return (
@@ -14,6 +15,7 @@ const Main = () => {
                 <Route path="/users" element={<Users greeting={'Usuarios'} />} />
                 <Route path="/pagos" element={<Pagos greeting={'Pagos'} />} />
                 <Route path="/signup" element={<SignUp greeting={'SignUp'} />} />
+                <Route path="/detalle/:id" element={<DetallePago greeting={'DetallePago'} />} />                
             </Routes>
         </main>
     )

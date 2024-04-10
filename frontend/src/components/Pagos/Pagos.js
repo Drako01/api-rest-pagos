@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.js';
+import { useNavigate } from 'react-router-dom';
+import opcionesTipoPago from '../../opcionesTipoPago';
 import './Pagos.css';
 
 const Pagos = () => {
@@ -10,11 +12,14 @@ const Pagos = () => {
     const [destinatario, setDestinatario] = useState("");
     const [, setError] = useState("");
     const [pagos, setPagos] = useState([]);
+    const [filtro, setFiltro] = useState("");
+    const navigate = useNavigate();
 
     const handleMontoChange = (event) => setMonto(event.target.value);
     const handleFechaChange = (event) => setFecha(event.target.value);
     const handleTipoPagoChange = (event) => setTipoPago(event.target.value);
     const handleDestinatarioChange = (event) => setDestinatario(event.target.value);
+    const handleFiltroChange = (event) => setFiltro(event.target.value.toLowerCase());
 
     const handleCrearPago = async (event) => {
         event.preventDefault();
@@ -88,6 +93,34 @@ const Pagos = () => {
         }
     };
 
+    const handleModificarPago = async (id) => {        
+        navigate(`/detalle/${id}`);
+    };
+
+    const pagosFiltrados = pagos.filter(pago =>
+        pago.monto.toString().includes(filtro) ||
+        pago.fecha.includes(filtro) ||
+        pago.tipoPago.toLowerCase().includes(filtro) ||
+        pago.destinatario.toLowerCase().includes(filtro)
+    );
+
+    const handleExportarCSV = () => {
+        const csvData = [
+            ['Monto', 'Fecha', 'Tipo de Pago', 'Destinatario'],
+            ...pagos.map(pago => [pago.monto, pago.fecha, pago.tipoPago, pago.destinatario])
+        ];
+
+        const csvContent = csvData.map(row => row.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'pagos.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <>
             <section className='Titulo'>
@@ -110,13 +143,16 @@ const Pagos = () => {
                                 name='fecha'
                                 onChange={handleFechaChange}
                             />
-                            <input
-                                type="text"
-                                placeholder="Tipo de Pago"
-                                name='tipoPago'
+                            <select
                                 value={tipoPago}
                                 onChange={handleTipoPagoChange}
-                            />
+                                className="select-tipoPago"
+                            >
+                                <option value="">Seleccione el tipo de pago</option>
+                                {opcionesTipoPago.map((opcion, index) => (
+                                    <option key={index} value={opcion}>{opcion}</option>
+                                ))}
+                            </select>
                             <input
                                 type="text"
                                 placeholder="Destinatario"
@@ -128,6 +164,15 @@ const Pagos = () => {
                         </form>
                         <div className="lista-pagos">
                             <h2>Lista de Pagos</h2>
+                            <section className='Filtro-Pagos'>
+                                <h3>Aplicar Filtro</h3>
+                                <input
+                                    type="text"
+                                    placeholder="Buscar..."
+                                    value={filtro}
+                                    onChange={handleFiltroChange}
+                                />
+                            </section>
                             <table>
                                 <thead>
                                     <tr>
@@ -135,16 +180,20 @@ const Pagos = () => {
                                         <th>Fecha</th>
                                         <th>Tipo de Pago</th>
                                         <th>Destinatario</th>
+                                        <th>Modificar</th>
                                         <th>Eliminar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {pagos.map((pago, index) => (
+                                    {pagosFiltrados.map((pago, index) => (
                                         <tr key={index}>
                                             <td>{pago.monto}</td>
                                             <td>{pago.fecha}</td>
                                             <td>{pago.tipoPago}</td>
                                             <td>{pago.destinatario}</td>
+                                            <td>
+                                                <button onClick={() => handleModificarPago(pago.id)} className='Eliminar-Boton'>O</button>
+                                            </td>
                                             <td>
                                                 <button onClick={() => handleEliminarPago(pago.id)} className='Eliminar-Boton'>X</button>
                                             </td>
@@ -152,6 +201,7 @@ const Pagos = () => {
                                     ))}
                                 </tbody>
                             </table>
+                            <button onClick={handleExportarCSV} className='Boton'>Exportar Lista a CSV</button>
                         </div>
                     </>
                 ) : (

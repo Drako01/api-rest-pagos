@@ -35,19 +35,27 @@ class PagosController {
 
     async actualizarPago(req, res) {
         const id = req.params.id;
+        const { monto, fecha, tipoPago, destinatario } = req.body; 
         try {
+            if (!monto || !fecha || !tipoPago || !destinatario) {
+                return res.status(400).json({ error: "Todos los campos son obligatorios." });
+            }
+    
             const [numFilasActualizadas, pagoActualizado] = await Pagos.update(req.body, {
                 where: { id },
-                returning: true, 
+                returning: true,
             });
+
             if (numFilasActualizadas === 0) {
                 return res.status(404).json({ error: 'Pago no encontrado' });
-            }
+            }    
+            
             res.json(pagoActualizado);
         } catch (error) {
             res.status(500).json({ error: 'Error al actualizar el pago' });
         }
     }
+    
 
     async eliminarPago(req, res) {
         const id = req.params.id;
