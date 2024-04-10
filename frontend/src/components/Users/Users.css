@@ -11,5 +11,17 @@
 
 .UserList {
     margin: 2rem auto;
-    max-width: 800px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 60vh;
+}
+.UserList h2 {
+    font-size: 1.8rem;
+}
+
+.UserList ul li {
+    height: 2.5rem;
+    color: darkblue;
+    font-weight: bold;
 }

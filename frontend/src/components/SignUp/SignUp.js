@@ -1,55 +1,44 @@
+import '../Login/Login.css'
 import React, { useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext'; 
 
-import './Login.css';
-
-const Login = () => {
+const SignUp = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const navigate = useNavigate();
-    const { signIn } = useAuth(); 
 
     const handleEmailChange = (event) => setEmail(event.target.value);
     const handlePasswordChange = (event) => setPassword(event.target.value);
 
-    const handleLogin = async (event) => {
+    const handleSignUp = async (event) => {
         event.preventDefault();
-        try {    
-            const userData = {
-                email: email,               
-            };
-            const token = localStorage.getItem("token");
-            const response = await fetch('http://localhost:8080/login', {
+        try {
+                        
+            const response = await fetch('http://localhost:8080/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ email, password })
             });
-    
+
             const data = await response.json();
-            
-    
-            if (data.token) {
-                const token = data.token;
-                localStorage.setItem("token", token);
-                signIn(userData); 
-                navigate('/');
+
+            if (response.ok) {               
+                navigate('/login');
             } else {
-                setError("Token no proporcionado");
+                setError(data.error || "Error al crear el usuario");
             }
         } catch (error) {
-            setError("Error al iniciar sesión. Por favor, inténtelo de nuevo más tarde.");
+            setError("Error al crear el usuario. Por favor, inténtelo de nuevo más tarde.");
         }
     };
 
     return (
-        <div className="flex justify-center items-center h-screen ">
-            <form onSubmit={handleLogin} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-1/3">
-                <h1 className="text-2xl mb-6">Iniciar Sesión</h1>
+        <div className="flex justify-center items-center h-screen">
+            <form onSubmit={handleSignUp} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-1/3">
+                <h1 className="text-2xl mb-6">Crear Cuenta</h1>
                 {error && <p className="text-red-500 text-xs italic mb-4 center">{error}</p>}
                 <section className="login-container">
                     <div className="mb-6">
@@ -85,10 +74,9 @@ const Login = () => {
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                             type="submit"
                         >
-                            Iniciar sesión
+                            Crear Cuenta
                         </button>
-
-                        <Link to={'/signup'}>Crear cuenta?</Link>
+                        <Link to={'/login'}>Iniciar Sesión?</Link>
                     </div>
                 </section>
             </form>
@@ -96,4 +84,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default SignUp;

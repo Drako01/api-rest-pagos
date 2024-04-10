@@ -1,0 +1,43 @@
+.lista-pagos,
+.crear-pago-form{    
+    margin-top: 4rem;
+}
+.lista-pagos{
+    display: flex;
+    flex-direction: column;
+    max-width: 1080px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.lista-pagos h2{
+    margin-bottom: 2rem;
+}
+
+.crear-pago-form{
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    gap: 1rem;
+}
+.Boton-Pago{
+    background-color: bisque;
+    height: 2rem;
+    border-radius: .25rem;
+}
+.Titulo h2{
+    margin-top: 1.5rem;
+    font-size: 1.8rem;
+    color: green;
+}
+
+.crear-pago-form input{
+    height: 2rem;
+    padding: .25rem;
+}
+
+.Eliminar-Boton{
+    color: red;
+    font-weight: bolder;
+}

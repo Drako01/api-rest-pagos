@@ -44,3 +44,27 @@ const requireAuth = (req, res, next) => {
 };
 
 export { requireAuth };
+
+const signUpUser = async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const existingUser = await UserModel.getUserByEmail(email);
+        if (existingUser) {
+            return res.status(400).json({ error: 'El usuario ya existe' });
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = await UserModel.createUser({
+            email: email,
+            password: hashedPassword
+        });
+
+        const secretKey = config.jwt.privateKey;
+        const token = jwt.sign({ userId: newUser.id }, secretKey, { expiresIn: '1h' });
+
+        res.json({ token });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al registrar usuario' });
+    }
+};
+
+export { signUpUser };

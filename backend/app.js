@@ -18,7 +18,7 @@ app.use(cors());
 
 // Rutas
 app.use('/', userRouter);
-app.use('/login', sessionRouter);
+app.use('/', sessionRouter);
 app.use('/pagos', pagosRouter);
 // Manejador de errores global
 app.use((err, req, res, next) => {
@@ -37,8 +37,8 @@ async function startServer() {
         loggers.debug('Iniciando el servidor...');
         await conectar();
         const httpServer = app.listen(PORT, () => {
-            loggers.http(`Servidor escuchando en el puerto ${PORT}`);
-            loggers.http(`Accede a través de: ${upServer}`);
+            console.log(`Servidor escuchando en el puerto ${PORT}`);
+            console.log(`Accede a través de: ${upServer}`);
         });
     } catch (error) {
         loggers.error(`Error al conectar a la base de datos: ${error.message}`);

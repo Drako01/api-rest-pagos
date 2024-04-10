@@ -18,7 +18,7 @@ class UserModel {
                 password: userData.password
             });
             return newUser.id;
-        } catch (error) {
+        } catch (error) {           
             throw new Error(`Error al crear el usuario: ${error.message}`);
         }
     }
@@ -32,7 +32,7 @@ class UserModel {
             });
 
             if (!user) {
-                throw new Error('Usuario no encontrado');
+                return null;
             }
 
             return user.toJSON(); 
