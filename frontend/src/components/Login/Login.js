@@ -64,6 +64,7 @@ const Login = () => {
                             value={email}
                             name="email"
                             onChange={handleEmailChange}
+                            required
                         />
                     </div>
                     <div className="mb-6">
@@ -78,9 +79,10 @@ const Login = () => {
                             value={password}
                             name="password"
                             onChange={handlePasswordChange}
+                            required
                         />
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between Login-Div">
                         <button
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                             type="submit"

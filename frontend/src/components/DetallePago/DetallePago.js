@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import opcionesTipoPago from '../../opcionesTipoPago';
 import './DetallePago.css'
 
@@ -96,6 +96,7 @@ const DetallePago = () => {
             <button onClick={handleActualizarPago} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                 Actualizar Pago
             </button>
+            <Link to={'/pagos'}>Volver a Pagos</Link>
         </div>
     );
 };

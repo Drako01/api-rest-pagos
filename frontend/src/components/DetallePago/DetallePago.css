@@ -21,7 +21,7 @@
 }
 .Detalles input {
     margin-left: 3rem;
-    width: 200px;
+    width: 213px;
     background-color: #eeeeeec4;
 }
 .Info-Carga {
@@ -36,5 +36,10 @@
     border-radius: .25rem;
     background-color: bisque;
     width: 100%;
-    margin-top: 2rem;
+    margin: 2rem 0;
+}
+
+.Detalles a{
+    color: blue;
+    text-decoration: underline;
 }

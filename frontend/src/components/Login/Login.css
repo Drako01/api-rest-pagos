@@ -27,3 +27,9 @@ p.center{
     height: 2rem;
     border-radius: .25rem;
 }
+
+.Login-Div a{
+    color: blue;
+    font-size: 1.12rem;
+    text-decoration: underline;
+}

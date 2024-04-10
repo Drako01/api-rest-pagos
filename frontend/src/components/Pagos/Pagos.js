@@ -68,9 +68,7 @@ const Pagos = () => {
         const dia = date.getDate().toString().padStart(2, '0');
         const mes = (date.getMonth() + 1).toString().padStart(2, '0');
         const año = date.getFullYear();
-        const horas = date.getHours().toString().padStart(2, '0');
-        const minutos = date.getMinutes().toString().padStart(2, '0');
-        return `${dia}-${mes}-${año} | ${horas}:${minutos} hs`;
+        return `${dia}-${mes}-${año}`;
     };
 
     const handleEliminarPago = async (id) => {
@@ -187,7 +185,7 @@ const Pagos = () => {
                                 <tbody>
                                     {pagosFiltrados.map((pago, index) => (
                                         <tr key={index}>
-                                            <td>{pago.monto}</td>
+                                            <td>$ {pago.monto} .-</td>
                                             <td>{pago.fecha}</td>
                                             <td>{pago.tipoPago}</td>
                                             <td>{pago.destinatario}</td>
