@@ -2,9 +2,10 @@
 
 # PayFlow — Payments Management Platform
 
-**Aplicación full stack para gestión de pagos, construida como proyecto de ingeniería de software y no sólo como un CRUD.**
+**Aplicación full stack para gestión de pagos, construida como proyecto de ingeniería de software y
+no sólo como un CRUD.**
 
-React 18 · Node.js · Express · PostgreSQL · Sequelize · JWT
+React 19 · Vite 8 · Node.js 24 LTS · Express 5 · PostgreSQL · Sequelize · JWT
 
 **Autor:** [Alejandro Daniel Di Stefano](https://github.com/Drako01)
 
@@ -14,12 +15,16 @@ React 18 · Node.js · Express · PostgreSQL · Sequelize · JWT
 
 ## ¿Qué es PayFlow?
 
-Este repositorio nació como un challenge técnico para gestionar pagos bancarios. La versión actual lleva esa idea a una implementación mucho más completa: una **plataforma de operaciones de pagos** con API REST versionada, autenticación, validaciones, filtros, paginación, métricas, observabilidad básica, CI y un frontend responsive con experiencia de dashboard.
+Este repositorio nació como un challenge técnico para gestionar pagos bancarios. La versión actual
+lleva esa idea a una implementación mucho más completa: una **plataforma de operaciones de pagos**
+con API REST versionada, autenticación, validaciones, filtros, paginación, métricas, observabilidad
+básica, CI y un frontend responsive con experiencia de dashboard.
 
 El objetivo del proyecto es doble:
 
 1. resolver correctamente el caso de uso de pagos;
-2. servir como referencia educativa de cómo evolucionar un prototipo hacia una aplicación mantenible y presentable profesionalmente.
+2. servir como referencia educativa de cómo evolucionar un prototipo hacia una aplicación mantenible
+   y presentable profesionalmente.
 
 ## Principales capacidades
 
@@ -104,13 +109,14 @@ La interfaz se adapta específicamente en cuatro niveles:
 - tablet/mobile;
 - mobile compacto.
 
-La tabla de pagos no depende únicamente de scroll horizontal: en pantallas pequeñas se renderiza visualmente como una lista de cards con `data-label`, conservando toda la información y acciones.
+La tabla de pagos no depende únicamente de scroll horizontal: en pantallas pequeñas se renderiza
+visualmente como una lista de cards con `data-label`, conservando toda la información y acciones.
 
 ## Arquitectura
 
 ```text
 ┌───────────────────────────────────┐
-│             React 18              │
+│             React 19              │
 │ Router · Auth Context · Dashboard │
 └─────────────────┬─────────────────┘
                   │ JSON / Bearer JWT
@@ -164,8 +170,8 @@ api-rest-pagos/
 
 Recomendado:
 
-- Node.js 20+
-- npm 10+
+- Node.js 24.15+
+- npm 11+
 - PostgreSQL 14+
 
 ## Puesta en marcha
@@ -231,7 +237,8 @@ Healthcheck:
 GET http://localhost:8080/health
 ```
 
-> `DB_SYNC=true` está pensado para levantar el proyecto localmente. En un entorno productivo se recomienda `DB_SYNC=false` y migraciones versionadas.
+> `DB_SYNC=true` está pensado para levantar el proyecto localmente. En un entorno productivo se
+> recomienda `DB_SYNC=false` y migraciones versionadas.
 
 ### 4. Frontend
 
@@ -253,7 +260,7 @@ http://localhost:3000
 Variable principal:
 
 ```dotenv
-REACT_APP_API_URL=http://localhost:8080/api/v1
+VITE_API_URL=http://localhost:8080/api/v1
 ```
 
 Ya no existen URLs de API hardcodeadas dentro de los componentes React.
@@ -263,7 +270,7 @@ Ya no existen URLs de API hardcodeadas dentro de los componentes React.
 ### Backend
 
 ```bash
-npm run dev       # nodemon
+npm run dev       # watch mode nativo de Node.js
 npm start         # runtime normal con node
 npm test          # test suite
 npm run test:watch
@@ -273,7 +280,7 @@ npm run test:watch
 
 ```bash
 npm start
-npm test -- --watchAll=false
+npm test
 npm run build
 ```
 
@@ -359,7 +366,9 @@ Controles implementados dentro del alcance del proyecto:
 - headers defensivos básicos;
 - errores internos no detallados al consumidor.
 
-Este repositorio es un proyecto educativo/técnico y **no debe interpretarse como una plataforma certificada para procesamiento financiero real**. La arquitectura documenta qué controles adicionales serían necesarios para un entorno regulado.
+Este repositorio es un proyecto educativo/técnico y **no debe interpretarse como una plataforma
+certificada para procesamiento financiero real**. La arquitectura documenta qué controles adicionales
+serían necesarios para un entorno regulado.
 
 ## CI
 
@@ -393,7 +402,11 @@ El diseño responsive usa un sistema CSS propio para mantener el frontend legibl
 
 ### La URL del backend dejó de estar hardcodeada
 
-Todas las llamadas pasan por `src/services/api.js` y `REACT_APP_API_URL`.
+Todas las llamadas pasan por `src/services/api.js` y `VITE_API_URL`.
+
+### El frontend usa Vite
+
+Create React App fue reemplazado por Vite para mantener compatibilidad con Node.js 24 y tooling vigente.
 
 ### Los modelos dejaron de sincronizar la DB al importarse
 
@@ -412,9 +425,12 @@ El repositorio mantiene la licencia incluida en [`LICENCE`](LICENCE).
 
 ## Autor
 
-**Alejandro Daniel Di Stefano**  
+**Alejandro Daniel Di Stefano**
+
 GitHub: [@Drako01](https://github.com/Drako01)
 
 ---
 
-Este repositorio está mantenido como proyecto práctico de referencia sobre React, Node.js, APIs REST, autenticación, PostgreSQL y evolución de software desde un challenge técnico hacia una solución más profesional.
+Este repositorio está mantenido como proyecto práctico de referencia sobre React, Node.js, APIs REST,
+autenticación, PostgreSQL y evolución de software desde un challenge técnico hacia una solución más
+profesional.

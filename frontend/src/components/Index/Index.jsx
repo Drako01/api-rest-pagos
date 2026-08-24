@@ -36,7 +36,7 @@ const Index = () => {
             </div>
 
             <div className="trust-row" aria-label="Tecnologías principales">
-              <span>React 18</span><span>Node.js</span><span>Express</span><span>PostgreSQL</span><span>JWT</span>
+              <span>React 19</span><span>Node.js</span><span>Express</span><span>PostgreSQL</span><span>JWT</span>
             </div>
           </div>
 

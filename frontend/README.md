@@ -4,8 +4,9 @@ Frontend React de PayFlow.
 
 ## Stack
 
-- React 18
-- React Router 6
+- React 19
+- React Router 7
+- Vite 8
 - Context API
 - CSS responsive propio
 - Fetch API mediante cliente centralizado
@@ -21,7 +22,7 @@ npm start
 Variable requerida:
 
 ```dotenv
-REACT_APP_API_URL=http://localhost:8080/api/v1
+VITE_API_URL=http://localhost:8080/api/v1
 ```
 
 ## Arquitectura
@@ -38,10 +39,10 @@ src/
 │   ├── DetallePago/
 │   └── Users/
 ├── context/
-│   └── AuthContext.js
+│   └── AuthContext.jsx
 ├── services/
 │   └── api.js
-├── App.js
+├── App.jsx
 ├── App.css
 └── index.css
 ```
@@ -80,12 +81,13 @@ La pantalla de pagos incluye:
 
 El diseño es mobile-first en comportamiento aunque mantenga una composición desktop amplia.
 
-A partir de `720px`, la tabla se transforma en cards con labels por fila. La navegación también cambia a menú colapsable en pantallas angostas.
+A partir de `720px`, la tabla se transforma en cards con labels por fila. La navegación también cambia
+a menú colapsable en pantallas angostas.
 
 ## Testing y build
 
 ```bash
-npm test -- --watchAll=false
+npm test
 npm run build
 ```
 

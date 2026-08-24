@@ -2,13 +2,16 @@
 
 ## Objetivo
 
-PayFlow es una aplicación full stack educativa para administrar pagos bancarios sin perder criterios de ingeniería aplicables a un producto real: separación de responsabilidades, contratos HTTP explícitos, configuración externa, autenticación, observabilidad básica, tests determinísticos y una interfaz responsive.
+PayFlow es una aplicación full stack educativa para administrar pagos bancarios sin perder criterios
+de ingeniería aplicables a un producto real: separación de responsabilidades, contratos HTTP
+explícitos, configuración externa, autenticación, observabilidad básica, tests determinísticos y una
+interfaz responsive.
 
 ## Vista general
 
 ```text
 ┌──────────────────────────────┐
-│          React 18            │
+│          React 19            │
 │  routing · auth · dashboard  │
 └──────────────┬───────────────┘
                │ HTTPS / JSON
@@ -42,7 +45,8 @@ PayFlow es una aplicación full stack educativa para administrar pagos bancarios
 8. normaliza 404 y errores inesperados;
 9. conecta PostgreSQL sólo al iniciar el proceso servidor.
 
-El módulo exporta `app`, por lo que Supertest puede verificar contratos sin abrir un puerto ni necesitar una base para rutas que no la utilizan.
+El módulo exporta `app`, por lo que Supertest puede verificar contratos sin abrir un puerto ni necesitar
+una base para rutas que no la utilizan.
 
 ### Capas
 
@@ -56,7 +60,8 @@ El módulo exporta `app`, por lo que Supertest puede verificar contratos sin abr
 
 ### Autenticación
 
-El cliente envía JWT por `Authorization: Bearer <token>`. El middleware `requireAuth` verifica firma y expiración antes de permitir acceso a recursos privados.
+El cliente envía JWT por `Authorization: Bearer <token>`. El middleware `requireAuth` verifica firma y
+expiración antes de permitir acceso a recursos privados.
 
 Las contraseñas:
 
@@ -66,7 +71,8 @@ Las contraseñas:
 
 ### Persistencia
 
-Sequelize centraliza la conexión. Los modelos ya no ejecutan `sync()` como efecto colateral al importarse. El sync de desarrollo es explícito mediante `DB_SYNC=true`.
+Sequelize centraliza la conexión. Los modelos ya no ejecutan `sync()` como efecto colateral al
+importarse. El sync de desarrollo es explícito mediante `DB_SYNC=true`.
 
 Esto permite distinguir entre:
 
@@ -77,7 +83,7 @@ Esto permite distinguir entre:
 
 ### Composition root
 
-`App.js` monta:
+`App.jsx` monta:
 
 - `AuthProvider`;
 - `BrowserRouter`;
@@ -89,13 +95,14 @@ Esto permite distinguir entre:
 
 `src/services/api.js` es el único lugar que conoce:
 
-- `REACT_APP_API_URL`;
+- `VITE_API_URL`;
 - token JWT;
 - headers HTTP;
 - parsing de respuestas;
 - estructura de errores.
 
-Los componentes consumen métodos semánticos como `api.payments()`, `api.login()` o `api.updatePayment()` y no repiten `fetch()` ni URLs hardcodeadas.
+Los componentes consumen métodos semánticos como `api.payments()`, `api.login()` o
+`api.updatePayment()` y no repiten `fetch()` ni URLs hardcodeadas.
 
 ### Estado de autenticación
 
@@ -147,7 +154,8 @@ Breakpoints principales:
 
 ## Seguridad aplicada
 
-Este proyecto no pretende reemplazar una plataforma bancaria certificada. Sí implementa controles razonables para el alcance:
+Este proyecto no pretende reemplazar una plataforma bancaria certificada. Sí implementa controles
+razonables para el alcance:
 
 - configuración sensible fuera del repositorio;
 - JWT con expiración;
@@ -161,7 +169,9 @@ Este proyecto no pretende reemplazar una plataforma bancaria certificada. Sí im
 - `X-Request-Id` para correlación;
 - recursos de pagos protegidos.
 
-Para un entorno financiero real se sumarían, entre otros: RBAC, refresh token rotation, MFA, rate limiting distribuido, audit trail inmutable, idempotency keys, cifrado de campos sensibles, secret manager, migraciones, SIEM, políticas antifraude y controles regulatorios.
+Para un entorno financiero real se sumarían, entre otros: RBAC, refresh token rotation, MFA, rate
+limiting distribuido, audit trail inmutable, idempotency keys, cifrado de campos sensibles, secret
+manager, migraciones, SIEM, políticas antifraude y controles regulatorios.
 
 ## CI
 
@@ -178,7 +188,7 @@ npm test
 
 ```text
 npm ci
-npm test -- --watchAll=false
+npm test
 npm run build
 ```
 
