@@ -1,38 +1,49 @@
 import request from 'supertest';
-import { conectar, desconectar } from '../src/config/Conexion.js';
 import app from '../app.js';
+import { validateCredentials, validatePayment } from '../src/utils/validation.js';
 
-describe('API Tests', () => {
-    // Prueba para verificar si la ruta de pagos devuelve un código de estado 200
-    test('GET /pagos devuelve código de estado 200', async () => {
-        const response = await request(app).get('/pagos');
-        expect(response.statusCode).toBe(200);
-    });
+describe('Payments API contract', () => {
+  test('GET /health exposes service health', async () => {
+    const response = await request(app).get('/health');
 
-    // Prueba para verificar si la ruta de creación de pagos devuelve un código de estado 201
-    test('POST /pagos devuelve código de estado 201', async () => {
-        const response = await request(app)
-            .post('/pagos')
-            .send({
-                monto: 100,
-                fecha: '2024-04-10',
-                tipoPago: 'Efectivo',
-                destinatario: 'Juan Perez'
-            });
-        expect(response.statusCode).toBe(201);
-    });    
+    expect(response.statusCode).toBe(200);
+    expect(response.body.status).toBe('ok');
+    expect(response.body.service).toBe('payments-api');
+    expect(response.headers['x-request-id']).toBeDefined();
+  });
+
+  test('GET /api/v1/payments requires authentication', async () => {
+    const response = await request(app).get('/api/v1/payments');
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body.error.code).toBe('AUTH_REQUIRED');
+  });
+
+  test('unknown routes return a normalized error', async () => {
+    const response = await request(app).get('/api/v1/unknown-resource');
+
+    expect(response.statusCode).toBe(404);
+    expect(response.body.error.code).toBe('ROUTE_NOT_FOUND');
+  });
 });
 
-describe('Database Connection Test', () => {
-    beforeAll(async () => {
-        await conectar(); // Se conecta a la base de datos antes de ejecutar las pruebas
+describe('Validation', () => {
+  test('rejects malformed credentials', () => {
+    const result = validateCredentials({ email: 'invalid', password: '123' });
+    expect(result.valid).toBe(false);
+    expect(result.errors.email).toBeDefined();
+    expect(result.errors.password).toBeDefined();
+  });
+
+  test('accepts a valid payment payload', () => {
+    const result = validatePayment({
+      monto: '1250.50',
+      fecha: '2026-08-23',
+      tipoPago: 'Transferencia',
+      destinatario: 'Proveedor Demo'
     });
 
-    afterAll(async () => {
-        await desconectar(); // Se desconecta de la base de datos después de ejecutar todas las pruebas
-    });
-
-    test('Conexión a la base de datos establecida correctamente', () => {
-        expect(conectar).not.toThrow(); // Verifica que la función conectar no lance errores
-    });
+    expect(result.valid).toBe(true);
+    expect(result.value.monto).toBe(1250.5);
+  });
 });
