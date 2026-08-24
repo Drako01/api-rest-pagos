@@ -1,101 +1,95 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext'; 
-
-import './Login.css';
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { api } from '../../services/api';
 
 const Login = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const navigate = useNavigate();
-    const { signIn } = useAuth(); 
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { signIn } = useAuth();
 
-    const handleEmailChange = (event) => setEmail(event.target.value);
-    const handlePasswordChange = (event) => setPassword(event.target.value);
+  const handleChange = ({ target }) => {
+    setForm((current) => ({ ...current, [target.name]: target.value }));
+    setError('');
+  };
 
-    const handleLogin = async (event) => {
-        event.preventDefault();
-        try {    
-            const userData = {
-                email: email,               
-            };
-            const token = localStorage.getItem("token");
-            const response = await fetch('http://localhost:8080/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ email, password })
-            });
-    
-            const data = await response.json();
-            
-    
-            if (data.token) {
-                const token = data.token;
-                localStorage.setItem("token", token);
-                signIn(userData); 
-                navigate('/');
-            } else {
-                setError("Token no proporcionado");
-            }
-        } catch (error) {
-            setError("Error al iniciar sesión. Por favor, inténtelo de nuevo más tarde.");
-        }
-    };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setSubmitting(true);
+    setError('');
 
-    return (
-        <div className="flex justify-center items-center h-screen ">
-            <form onSubmit={handleLogin} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-1/3">
-                <h1 className="text-2xl mb-6">Iniciar Sesión</h1>
-                {error && <p className="text-red-500 text-xs italic mb-4 center">{error}</p>}
-                <section className="login-container">
-                    <div className="mb-6">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-                            Email
-                        </label>
-                        <input
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            id="email"
-                            type="email"
-                            placeholder="Email"
-                            value={email}
-                            name="email"
-                            onChange={handleEmailChange}
-                            required
-                        />
-                    </div>
-                    <div className="mb-6">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-                            Contraseña
-                        </label>
-                        <input
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-                            id="password"
-                            type="password"
-                            placeholder="Contraseña"
-                            value={password}
-                            name="password"
-                            onChange={handlePasswordChange}
-                            required
-                        />
-                    </div>
-                    <div className="flex items-center justify-between Login-Div">
-                        <button
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                            type="submit"
-                        >
-                            Iniciar sesión
-                        </button>
+    try {
+      const response = await api.login(form);
+      signIn(response);
+      navigate(location.state?.from?.pathname || '/pagos', { replace: true });
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-                        <Link to={'/signup'}>Crear cuenta?</Link>
-                    </div>
-                </section>
-            </form>
-        </div >
-    );
+  return (
+    <section className="auth-page">
+      <div className="shell auth-grid">
+        <div className="auth-aside">
+          <span className="eyebrow">ACCESO SEGURO</span>
+          <h1>Volvé a tu operación de pagos.</h1>
+          <p>Ingresá para consultar movimientos, métricas y administrar transacciones desde el dashboard.</p>
+          <ul className="check-list">
+            <li>Sesiones JWT con expiración</li>
+            <li>API protegida por Bearer token</li>
+            <li>Contratos y errores normalizados</li>
+          </ul>
+        </div>
+
+        <form className="auth-card" onSubmit={handleSubmit} noValidate>
+          <div className="auth-card-heading">
+            <span className="auth-icon" aria-hidden="true">↗</span>
+            <div><h2>Iniciar sesión</h2><p>Usá tus credenciales para continuar.</p></div>
+          </div>
+
+          {error && <div className="alert alert-error" role="alert">{error}</div>}
+
+          <label className="field">
+            <span>Email</span>
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="nombre@empresa.com"
+              autoComplete="email"
+              required
+            />
+          </label>
+
+          <label className="field">
+            <span>Contraseña</span>
+            <input
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              placeholder="Mínimo 8 caracteres"
+              autoComplete="current-password"
+              minLength="8"
+              required
+            />
+          </label>
+
+          <button className="button button-primary button-full" type="submit" disabled={submitting}>
+            {submitting ? 'Ingresando…' : 'Ingresar al dashboard'}
+          </button>
+
+          <p className="auth-switch">¿Todavía no tenés cuenta? <Link to="/signup">Crear cuenta</Link></p>
+        </form>
+      </div>
+    </section>
+  );
 };
 
 export default Login;
