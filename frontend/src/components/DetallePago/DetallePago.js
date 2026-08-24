@@ -1,104 +1,76 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import opcionesTipoPago from '../../opcionesTipoPago';
-import './DetallePago.css'
+import { api } from '../../services/api';
 
 const DetallePago = () => {
-    const { id } = useParams();
-    const [, setPago] = useState({});
-    const [monto, setMonto] = useState("");
-    const [fecha, setFecha] = useState("");
-    const [tipoPago, setTipoPago] = useState("");
-    const [destinatario, setDestinatario] = useState("");
-    const [error, setError] = useState(null);   
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ monto: '', fecha: '', tipoPago: '', destinatario: '' });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
-    useEffect(() => {
-        const obtenerPago = async () => {
-            try {
-                const response = await fetch(`http://localhost:8080/pagos/${id}`);
-                if (!response.ok) {
-                    throw new Error("No se pudo obtener el pago.");
-                }
-                const data = await response.json();
-                setPago(data);
-                setMonto(data.monto);
-                setFecha(data.fecha);
-                setTipoPago(data.tipoPago);
-                setDestinatario(data.destinatario);
-            } catch (error) {
-                setError(error.message);
-            }
-        };
-
-        obtenerPago();
-    }, [id]);
-
-    const handleActualizarPago = async () => {
-        try {
-            const token = localStorage.getItem("token");
-            const response = await fetch(`http://localhost:8080/pagos/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ monto, fecha, tipoPago, destinatario })
-            });
-
-            if (!monto || !fecha || !tipoPago || !destinatario) {
-                setError("Todos los campos son obligatorios.");
-                return;
-            }
-
-            if (!response.ok) {
-                throw new Error("No se pudo actualizar el pago.");
-            }
-
-            window.location.href = '/pagos';
-        } catch (error) {
-            setError(error.message);
-        }
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const response = await api.payment(id);
+        const payment = response.data;
+        setForm({
+          monto: payment.monto,
+          fecha: String(payment.fecha).slice(0, 10),
+          tipoPago: payment.tipoPago,
+          destinatario: payment.destinatario
+        });
+      } catch (requestError) {
+        setError(requestError.message);
+      } finally {
+        setLoading(false);
+      }
     };
+    load();
+  }, [id]);
 
-    if (error) {
-        return <div className="text-red-500">{error}</div>;
+  const handleChange = ({ target }) => setForm((current) => ({ ...current, [target.name]: target.value }));
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    setError('');
+    try {
+      await api.updatePayment(id, form);
+      navigate('/pagos', { replace: true });
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setSaving(false);
     }
+  };
 
-    return (
-        <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-md shadow-md Detalles">
-            <h2 className="text-2xl font-bold ">Detalle del Pago</h2>
-            <div className="Info-Carga">
-                <label className="block text-gray-700 text-sm font-bold mb-2">Monto:</label>
-                <input type="number" className="form-input w-full" value={monto} onChange={(e) => setMonto(e.target.value)} required/>
-            </div>
-            <div className="Info-Carga">
-                <label className="block text-gray-700 text-sm font-bold mb-2">Fecha:</label>
-                <input type="date" className="form-input w-full" value={fecha} onChange={(e) => setFecha(e.target.value)} required/>
-            </div>
-            <div className="Info-Carga">
-                <label className="block text-gray-700 text-sm font-bold mb-2">Tipo de Pago:</label>
-                <select
-                    value={tipoPago}
-                    onChange={(e) => setTipoPago(e.target.value)}
-                    className="form-select w-full"
-                    required
-                >
-                    <option value="">Seleccione el tipo de pago</option>
-                    {opcionesTipoPago.map((opcion, index) => (
-                        <option key={index} value={opcion}>{opcion}</option>
-                    ))}
-                </select>
-            </div>
-            <div className="Info-Carga">
-                <label className="block text-gray-700 text-sm font-bold mb-2">Destinatario:</label>
-                <input type="text" className="form-input w-full" value={destinatario} onChange={(e) => setDestinatario(e.target.value)} required/>
-            </div>
-            <button onClick={handleActualizarPago} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Actualizar Pago
-            </button>
-            <Link to={'/pagos'}>Volver a Pagos</Link>
+  if (loading) return <div className="page-shell centered-state"><div className="loader" /><p>Cargando pago…</p></div>;
+
+  return (
+    <section className="detail-page">
+      <div className="shell detail-shell">
+        <Link className="back-link" to="/pagos">← Volver al dashboard</Link>
+        <div className="detail-header">
+          <div><span className="eyebrow">EDICIÓN DE OPERACIÓN</span><h1>Pago #{String(id).padStart(4, '0')}</h1><p>Modificá los datos y guardá los cambios sobre el recurso existente.</p></div>
+          <span className="badge badge-success">Registro activo</span>
         </div>
-    );
+
+        <form className="panel detail-card" onSubmit={handleSubmit}>
+          {error && <div className="alert alert-error" role="alert">{error}</div>}
+          <div className="form-grid form-grid-two">
+            <label className="field"><span>Monto</span><input type="number" min="0.01" step="0.01" name="monto" value={form.monto} onChange={handleChange} required /></label>
+            <label className="field"><span>Fecha</span><input type="date" name="fecha" value={form.fecha} onChange={handleChange} required /></label>
+            <label className="field"><span>Tipo de pago</span><select name="tipoPago" value={form.tipoPago} onChange={handleChange} required><option value="">Seleccionar</option>{opcionesTipoPago.map((option) => <option key={option}>{option}</option>)}</select></label>
+            <label className="field"><span>Destinatario</span><input name="destinatario" value={form.destinatario} onChange={handleChange} maxLength="120" required /></label>
+          </div>
+          <div className="form-actions detail-actions"><Link className="button button-ghost" to="/pagos">Cancelar</Link><button className="button button-primary" type="submit" disabled={saving}>{saving ? 'Guardando…' : 'Guardar cambios'}</button></div>
+        </form>
+      </div>
+    </section>
+  );
 };
 
 export default DetallePago;
