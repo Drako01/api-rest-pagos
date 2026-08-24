@@ -1,215 +1,217 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext.js';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import opcionesTipoPago from '../../opcionesTipoPago';
-import './Pagos.css';
+import { api } from '../../services/api';
+
+const emptyPayment = { monto: '', fecha: '', tipoPago: '', destinatario: '' };
+
+const currency = new Intl.NumberFormat('es-AR', {
+  style: 'currency',
+  currency: 'ARS',
+  maximumFractionDigits: 2
+});
+
+const dateFormatter = new Intl.DateTimeFormat('es-AR', {
+  day: '2-digit', month: '2-digit', year: 'numeric'
+});
+
+const escapeCsv = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
 
 const Pagos = () => {
-    const { authenticated, userProfile } = useAuth();
-    const [monto, setMonto] = useState("");
-    const [fecha, setFecha] = useState("");
-    const [tipoPago, setTipoPago] = useState("");
-    const [destinatario, setDestinatario] = useState("");
-    const [, setError] = useState("");
-    const [pagos, setPagos] = useState([]);
-    const [filtro, setFiltro] = useState("");
-    const navigate = useNavigate();
+  const { userProfile } = useAuth();
+  const navigate = useNavigate();
+  const [payments, setPayments] = useState([]);
+  const [summary, setSummary] = useState({ totalAmount: 0, averageAmount: 0, records: 0 });
+  const [meta, setMeta] = useState({ page: 1, pages: 1, total: 0, limit: 10 });
+  const [filters, setFilters] = useState({ search: '', tipoPago: '', dateFrom: '', dateTo: '', sortBy: 'fecha', order: 'desc' });
+  const [draftSearch, setDraftSearch] = useState('');
+  const [form, setForm] = useState(emptyPayment);
+  const [showCreate, setShowCreate] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
 
-    const handleMontoChange = (event) => setMonto(event.target.value);
-    const handleFechaChange = (event) => setFecha(event.target.value);
-    const handleTipoPagoChange = (event) => setTipoPago(event.target.value);
-    const handleDestinatarioChange = (event) => setDestinatario(event.target.value);
-    const handleFiltroChange = (event) => setFiltro(event.target.value.toLowerCase());
+  const loadPayments = useCallback(async (page = meta.page) => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await api.payments({ ...filters, page, limit: meta.limit });
+      setPayments(response.data || []);
+      setSummary(response.summary || { totalAmount: 0, averageAmount: 0, records: 0 });
+      setMeta(response.meta || { page: 1, pages: 1, total: 0, limit: 10 });
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [filters, meta.limit, meta.page]);
 
-    const handleCrearPago = async (event) => {
-        event.preventDefault();
-        try {
-            const token = localStorage.getItem("token");
-            const response = await fetch('http://localhost:8080/pagos', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ monto, fecha, tipoPago, destinatario })
-            });
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setFilters((current) => ({ ...current, search: draftSearch }));
+    }, 300);
+    return () => window.clearTimeout(timeout);
+  }, [draftSearch]);
 
-            const nuevoPago = await response.json();
-            nuevoPago.fecha = formatFecha(nuevoPago.fecha);
+  useEffect(() => {
+    loadPayments(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.search, filters.tipoPago, filters.dateFrom, filters.dateTo, filters.sortBy, filters.order]);
 
-            setPagos([...pagos, nuevoPago]);
+  const handleFormChange = ({ target }) => {
+    setForm((current) => ({ ...current, [target.name]: target.value }));
+    setError('');
+  };
 
-            setMonto("");
-            setFecha("");
-            setTipoPago("");
-            setDestinatario("");
+  const handleCreate = async (event) => {
+    event.preventDefault();
+    setSubmitting(true);
+    setError('');
+    setNotice('');
+    try {
+      await api.createPayment(form);
+      setForm(emptyPayment);
+      setShowCreate(false);
+      setNotice('Pago registrado correctamente.');
+      await loadPayments(1);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-        } catch (error) {
-            setError("Error al crear el pago. Por favor, inténtelo de nuevo más tarde.");
-        }
-    };
+  const handleDelete = async (payment) => {
+    const confirmed = window.confirm(`¿Eliminar el pago a ${payment.destinatario} por ${currency.format(Number(payment.monto))}?`);
+    if (!confirmed) return;
 
-    useEffect(() => {
-        const fetchPagos = async () => {
-            try {
-                const response = await fetch('http://localhost:8080/pagos');
-                const data = await response.json();
-                setPagos(data.map(pago => ({ ...pago, fecha: formatFecha(pago.fecha) })));
-            } catch (error) {
-                console.error('Error al obtener la lista de pagos:', error);
-            }
-        };
+    setError('');
+    try {
+      await api.deletePayment(payment.id);
+      setNotice('Pago eliminado correctamente.');
+      await loadPayments(payments.length === 1 && meta.page > 1 ? meta.page - 1 : meta.page);
+    } catch (requestError) {
+      setError(requestError.message);
+    }
+  };
 
-        fetchPagos();
-    }, []);
+  const resetFilters = () => {
+    setDraftSearch('');
+    setFilters({ search: '', tipoPago: '', dateFrom: '', dateTo: '', sortBy: 'fecha', order: 'desc' });
+  };
 
-    const formatFecha = (fechaString) => {
-        const date = new Date(fechaString);
-        const dia = date.getDate().toString().padStart(2, '0');
-        const mes = (date.getMonth() + 1).toString().padStart(2, '0');
-        const año = date.getFullYear();
-        return `${dia}-${mes}-${año}`;
-    };
+  const exportCsv = () => {
+    const rows = [
+      ['ID', 'Monto', 'Fecha', 'Tipo de pago', 'Destinatario'],
+      ...payments.map((payment) => [payment.id, payment.monto, payment.fecha, payment.tipoPago, payment.destinatario])
+    ];
+    const csv = `\uFEFF${rows.map((row) => row.map(escapeCsv).join(';')).join('\n')}`;
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `pagos-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
-    const handleEliminarPago = async (id) => {
-        try {
-            const token = localStorage.getItem("token");
-            const response = await fetch(`http://localhost:8080/pagos/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+  const activeFilters = useMemo(() => [filters.search, filters.tipoPago, filters.dateFrom, filters.dateTo].filter(Boolean).length, [filters]);
 
-            if (response.ok) {
-                setPagos(pagos.filter(pago => pago.id !== id));
-            } else {
-                setError("Error al eliminar el pago.");
-            }
-        } catch (error) {
-            setError("Error al eliminar el pago. Por favor, inténtelo de nuevo más tarde.");
-        }
-    };
+  return (
+    <section className="dashboard-page">
+      <div className="shell">
+        <div className="dashboard-heading">
+          <div>
+            <span className="eyebrow">OPERACIONES</span>
+            <h1>Dashboard de pagos</h1>
+            <p>Administrá movimientos y analizá la operación de forma centralizada.</p>
+          </div>
+          <div className="dashboard-heading-actions">
+            <span className="operator-label">Operador<br /><strong>{userProfile?.email}</strong></span>
+            <button className="button button-primary" type="button" onClick={() => setShowCreate((value) => !value)}>
+              {showCreate ? 'Cerrar formulario' : '+ Nuevo pago'}
+            </button>
+          </div>
+        </div>
 
-    const handleModificarPago = async (id) => {        
-        navigate(`/detalle/${id}`);
-    };
+        {error && <div className="alert alert-error" role="alert">{error}</div>}
+        {notice && <div className="alert alert-success" role="status">{notice}</div>}
 
-    const pagosFiltrados = pagos.filter(pago =>
-        pago.monto.toString().includes(filtro) ||
-        pago.fecha.includes(filtro) ||
-        pago.tipoPago.toLowerCase().includes(filtro) ||
-        pago.destinatario.toLowerCase().includes(filtro)
-    );
+        <div className="kpi-grid">
+          <article className="kpi-card"><span>Volumen filtrado</span><strong>{currency.format(summary.totalAmount)}</strong><small>Importe acumulado</small></article>
+          <article className="kpi-card"><span>Ticket promedio</span><strong>{currency.format(summary.averageAmount)}</strong><small>Promedio por operación</small></article>
+          <article className="kpi-card"><span>Movimientos</span><strong>{summary.records}</strong><small>Registros encontrados</small></article>
+          <article className="kpi-card accent"><span>Filtros activos</span><strong>{activeFilters}</strong><small>{activeFilters ? 'Vista segmentada' : 'Vista completa'}</small></article>
+        </div>
 
-    const handleExportarCSV = () => {
-        const csvData = [
-            ['Monto', 'Fecha', 'Tipo de Pago', 'Destinatario'],
-            ...pagos.map(pago => [pago.monto, pago.fecha, pago.tipoPago, pago.destinatario])
-        ];
+        {showCreate && (
+          <form className="panel payment-form" onSubmit={handleCreate}>
+            <div className="panel-heading"><div><span className="eyebrow">NUEVA OPERACIÓN</span><h2>Registrar pago</h2></div><span className="panel-helper">Todos los campos son obligatorios</span></div>
+            <div className="form-grid form-grid-four">
+              <label className="field"><span>Monto</span><input name="monto" type="number" min="0.01" step="0.01" value={form.monto} onChange={handleFormChange} placeholder="0,00" required /></label>
+              <label className="field"><span>Fecha</span><input name="fecha" type="date" value={form.fecha} onChange={handleFormChange} required /></label>
+              <label className="field"><span>Tipo de pago</span><select name="tipoPago" value={form.tipoPago} onChange={handleFormChange} required><option value="">Seleccionar</option>{opcionesTipoPago.map((option) => <option key={option}>{option}</option>)}</select></label>
+              <label className="field"><span>Destinatario</span><input name="destinatario" value={form.destinatario} onChange={handleFormChange} maxLength="120" placeholder="Nombre o razón social" required /></label>
+            </div>
+            <div className="form-actions"><button className="button button-ghost" type="button" onClick={() => { setForm(emptyPayment); setShowCreate(false); }}>Cancelar</button><button className="button button-primary" type="submit" disabled={submitting}>{submitting ? 'Registrando…' : 'Registrar pago'}</button></div>
+          </form>
+        )}
 
-        const csvContent = csvData.map(row => row.join(',')).join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'pagos.csv');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
+        <div className="panel filters-panel">
+          <div className="filters-row">
+            <label className="search-field"><span aria-hidden="true">⌕</span><input value={draftSearch} onChange={(event) => setDraftSearch(event.target.value)} placeholder="Buscar destinatario o tipo…" aria-label="Buscar pagos" /></label>
+            <select value={filters.tipoPago} onChange={(event) => setFilters((current) => ({ ...current, tipoPago: event.target.value }))} aria-label="Filtrar por tipo de pago"><option value="">Todos los tipos</option>{opcionesTipoPago.map((option) => <option key={option}>{option}</option>)}</select>
+            <input type="date" value={filters.dateFrom} onChange={(event) => setFilters((current) => ({ ...current, dateFrom: event.target.value }))} aria-label="Fecha desde" />
+            <input type="date" value={filters.dateTo} onChange={(event) => setFilters((current) => ({ ...current, dateTo: event.target.value }))} aria-label="Fecha hasta" />
+            <button className="button button-ghost button-small" type="button" onClick={resetFilters}>Limpiar</button>
+          </div>
+          <div className="filters-secondary">
+            <span>{meta.total} resultado{meta.total === 1 ? '' : 's'}</span>
+            <div>
+              <label>Ordenar por <select value={filters.sortBy} onChange={(event) => setFilters((current) => ({ ...current, sortBy: event.target.value }))}><option value="fecha">Fecha</option><option value="monto">Monto</option><option value="destinatario">Destinatario</option><option value="tipoPago">Tipo</option></select></label>
+              <button className="sort-button" type="button" onClick={() => setFilters((current) => ({ ...current, order: current.order === 'asc' ? 'desc' : 'asc' }))} aria-label="Cambiar dirección de orden">{filters.order === 'asc' ? '↑' : '↓'}</button>
+              <button className="button button-secondary button-small" type="button" onClick={exportCsv} disabled={!payments.length}>Exportar CSV</button>
+            </div>
+          </div>
+        </div>
 
-    return (
-        <>
-            <section className='Titulo'>
-                {authenticated ? (
-                    <>
-                        <h1 variant="h1" className='Titular'>Bienvenido, {userProfile?.email}</h1>
-                        <h2>Generación de Pagos</h2>
-                        <form onSubmit={handleCrearPago} className="crear-pago-form">
-                            <input
-                                type="number"
-                                placeholder="Monto"
-                                value={monto}
-                                name='monto'
-                                onChange={handleMontoChange}
-                            />
-                            <input
-                                type="date"
-                                placeholder="Fecha"
-                                value={fecha}
-                                name='fecha'
-                                onChange={handleFechaChange}
-                            />
-                            <select
-                                value={tipoPago}
-                                onChange={handleTipoPagoChange}
-                                className="select-tipoPago"
-                            >
-                                <option value="">Seleccione el tipo de pago</option>
-                                {opcionesTipoPago.map((opcion, index) => (
-                                    <option key={index} value={opcion}>{opcion}</option>
-                                ))}
-                            </select>
-                            <input
-                                type="text"
-                                placeholder="Destinatario"
-                                value={destinatario}
-                                name='destinatario'
-                                onChange={handleDestinatarioChange}
-                            />
-                            <button type="submit" className='Boton-Pago'>Crear Pago</button>
-                        </form>
-                        <div className="lista-pagos">
-                            <h2>Lista de Pagos</h2>
-                            <section className='Filtro-Pagos'>
-                                <h3>Aplicar Filtro</h3>
-                                <input
-                                    type="text"
-                                    placeholder="Buscar..."
-                                    value={filtro}
-                                    onChange={handleFiltroChange}
-                                />
-                            </section>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Monto</th>
-                                        <th>Fecha</th>
-                                        <th>Tipo de Pago</th>
-                                        <th>Destinatario</th>
-                                        <th>Modificar</th>
-                                        <th>Eliminar</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {pagosFiltrados.map((pago, index) => (
-                                        <tr key={index}>
-                                            <td>$ {pago.monto} .-</td>
-                                            <td>{pago.fecha}</td>
-                                            <td>{pago.tipoPago}</td>
-                                            <td>{pago.destinatario}</td>
-                                            <td>
-                                                <button onClick={() => handleModificarPago(pago.id)} className='Eliminar-Boton'>O</button>
-                                            </td>
-                                            <td>
-                                                <button onClick={() => handleEliminarPago(pago.id)} className='Eliminar-Boton'>X</button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                            <button onClick={handleExportarCSV} className='Boton'>Exportar Lista a CSV</button>
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        <h1 variant="h1" className='Titular'>No está Autorizado</h1>
-                    </>
-                )}
-            </section>
-        </>
-    );
+        <div className="panel payments-panel">
+          {loading ? (
+            <div className="centered-state"><div className="loader" /><p>Cargando operaciones…</p></div>
+          ) : payments.length === 0 ? (
+            <div className="empty-state"><div className="empty-icon">₱</div><h3>No encontramos pagos</h3><p>Probá ajustando los filtros o registrá una nueva operación.</p><button className="button button-primary" type="button" onClick={() => setShowCreate(true)}>Registrar pago</button></div>
+          ) : (
+            <div className="table-scroll">
+              <table className="data-table">
+                <thead><tr><th>Operación</th><th>Destinatario</th><th>Tipo</th><th>Fecha</th><th className="align-right">Monto</th><th className="align-right">Acciones</th></tr></thead>
+                <tbody>
+                  {payments.map((payment) => (
+                    <tr key={payment.id}>
+                      <td data-label="Operación"><span className="payment-id">#{String(payment.id).padStart(4, '0')}</span></td>
+                      <td data-label="Destinatario"><strong>{payment.destinatario}</strong></td>
+                      <td data-label="Tipo"><span className="badge">{payment.tipoPago}</span></td>
+                      <td data-label="Fecha">{dateFormatter.format(new Date(payment.fecha))}</td>
+                      <td data-label="Monto" className="align-right amount-cell">{currency.format(Number(payment.monto))}</td>
+                      <td data-label="Acciones" className="align-right"><div className="row-actions"><button type="button" onClick={() => navigate(`/detalle/${payment.id}`)} aria-label={`Editar pago ${payment.id}`}>Editar</button><button type="button" className="danger-link" onClick={() => handleDelete(payment)} aria-label={`Eliminar pago ${payment.id}`}>Eliminar</button></div></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {!loading && meta.pages > 1 && (
+            <div className="pagination">
+              <button type="button" disabled={meta.page <= 1} onClick={() => loadPayments(meta.page - 1)}>← Anterior</button>
+              <span>Página <strong>{meta.page}</strong> de {meta.pages}</span>
+              <button type="button" disabled={meta.page >= meta.pages} onClick={() => loadPayments(meta.page + 1)}>Siguiente →</button>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export default Pagos;
