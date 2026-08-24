@@ -9,6 +9,7 @@
 
 # Build and coverage
 frontend/build/
+frontend/dist/
 **/coverage/
 
 # Runtime

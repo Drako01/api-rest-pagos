@@ -1,29 +1,34 @@
+import assert from 'node:assert/strict';
+import { describe, test } from 'node:test';
 import request from 'supertest';
-import app from '../app.js';
-import { validateCredentials, validatePayment } from '../src/utils/validation.js';
+
+process.env.NODE_ENV = 'test';
+
+const { default: app } = await import('../app.js');
+const { validateCredentials, validatePayment } = await import('../src/utils/validation.js');
 
 describe('Payments API contract', () => {
   test('GET /health exposes service health', async () => {
     const response = await request(app).get('/health');
 
-    expect(response.statusCode).toBe(200);
-    expect(response.body.status).toBe('ok');
-    expect(response.body.service).toBe('payments-api');
-    expect(response.headers['x-request-id']).toBeDefined();
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.status, 'ok');
+    assert.equal(response.body.service, 'payments-api');
+    assert.ok(response.headers['x-request-id']);
   });
 
   test('GET /api/v1/payments requires authentication', async () => {
     const response = await request(app).get('/api/v1/payments');
 
-    expect(response.statusCode).toBe(401);
-    expect(response.body.error.code).toBe('AUTH_REQUIRED');
+    assert.equal(response.statusCode, 401);
+    assert.equal(response.body.error.code, 'AUTH_REQUIRED');
   });
 
   test('unknown routes return a normalized error', async () => {
     const response = await request(app).get('/api/v1/unknown-resource');
 
-    expect(response.statusCode).toBe(404);
-    expect(response.body.error.code).toBe('ROUTE_NOT_FOUND');
+    assert.equal(response.statusCode, 404);
+    assert.equal(response.body.error.code, 'ROUTE_NOT_FOUND');
   });
 });
 
@@ -34,15 +39,15 @@ describe('Validation', () => {
       { strongPassword: true }
     );
 
-    expect(result.valid).toBe(false);
-    expect(result.errors.email).toBeDefined();
-    expect(result.errors.password).toBeDefined();
+    assert.equal(result.valid, false);
+    assert.ok(result.errors.email);
+    assert.ok(result.errors.password);
   });
 
   test('keeps login validation compatible with existing passwords', () => {
     const result = validateCredentials({ email: 'legacy@example.com', password: '123' });
 
-    expect(result.valid).toBe(true);
+    assert.equal(result.valid, true);
   });
 
   test('accepts a valid payment payload', () => {
@@ -53,7 +58,7 @@ describe('Validation', () => {
       destinatario: 'Proveedor Demo'
     });
 
-    expect(result.valid).toBe(true);
-    expect(result.value.monto).toBe(1250.5);
+    assert.equal(result.valid, true);
+    assert.equal(result.value.monto, 1250.5);
   });
 });

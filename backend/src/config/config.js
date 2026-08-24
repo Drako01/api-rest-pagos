@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const parseOrigins = (value) => (value || 'http://localhost:3000')
   .split(',')

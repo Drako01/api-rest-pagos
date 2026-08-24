@@ -11,7 +11,7 @@ API REST de la plataforma PayFlow.
 - JWT
 - bcrypt
 - Winston
-- Jest + Supertest
+- Node.js test runner + Supertest
 
 ## Inicio rápido
 
@@ -91,7 +91,8 @@ Detalle de contratos: [`../docs/API.md`](../docs/API.md).
 npm test
 ```
 
-Los tests base están diseñados para validar healthcheck, auth boundary, errores y validadores sin depender de una instancia PostgreSQL en CI.
+Los tests base están diseñados para validar healthcheck, auth boundary, errores y validadores sin
+depender de una instancia PostgreSQL en CI.
 
 ## Seguridad
 
