@@ -1,6 +1,6 @@
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export const validateCredentials = ({ email, password }) => {
+export const validateCredentials = ({ email, password }, { strongPassword = false } = {}) => {
   const errors = {};
   const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
 
@@ -8,7 +8,9 @@ export const validateCredentials = ({ email, password }) => {
     errors.email = 'Ingresá un email válido.';
   }
 
-  if (typeof password !== 'string' || password.length < 8) {
+  if (typeof password !== 'string' || password.length === 0) {
+    errors.password = 'La contraseña es obligatoria.';
+  } else if (strongPassword && password.length < 8) {
     errors.password = 'La contraseña debe tener al menos 8 caracteres.';
   }
 
