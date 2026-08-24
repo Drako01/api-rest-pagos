@@ -44,7 +44,7 @@ export const loginUser = async (req, res, next) => {
 
 export const signUpUser = async (req, res, next) => {
   try {
-    const validation = validateCredentials(req.body);
+    const validation = validateCredentials(req.body, { strongPassword: true });
     if (!validation.valid) {
       return res.status(422).json({
         error: { code: 'VALIDATION_ERROR', message: 'Revisá los datos ingresados.', fields: validation.errors }
