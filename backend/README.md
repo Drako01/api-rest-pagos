@@ -1,42 +1,110 @@
-# Backend de la Aplicación de Gestión de Pagos Bancarios
+# PayFlow Backend
 
-Este repositorio contiene el código fuente para el backend de una aplicación web de gestión de pagos bancarios. El backend está desarrollado en Node.js y Express, y se encarga de gestionar la lógica del negocio y la comunicación con la base de datos PostgreSQL.
+API REST de la plataforma PayFlow.
 
-## Instalación
+## Stack
 
-1. Clona este repositorio en tu máquina local.
+- Node.js
+- Express
+- PostgreSQL
+- Sequelize
+- JWT
+- bcrypt
+- Winston
+- Jest + Supertest
 
-```
-git clone https://github.com/usuario/backend-pagos.git
+## Inicio rápido
 
-```
-
-
-2. Accede al directorio del backend.
-
-```
-cd backend
-
-```
-
-
-3. Instala las dependencias utilizando npm.
-
-```
-npm install
-
+```bash
+npm ci
+cp .env.example .env
+npm run dev
 ```
 
+Servidor por defecto:
 
-4. Configura las variables de entorno en el archivo `.env` que te proporciono dentro del repositorio.
-
-5. Inicia el servidor.
-
-```
-npm start
-
+```text
+http://localhost:8080
 ```
 
-## Uso
+Healthcheck:
 
-El backend proporciona una API RESTful para manejar las operaciones CRUD de pagos. Puedes acceder a la documentación de la API en la ruta `/api-docs` una vez que el servidor esté en funcionamiento.
+```text
+GET /health
+```
+
+## Variables de entorno
+
+```dotenv
+NODE_ENV=development
+PORT=8080
+DB_DIALECT=postgres
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=change-me
+DB_NAME=pagos
+DB_LOGGING=false
+DB_SYNC=true
+JWT_SECRET=replace-with-a-long-random-secret
+JWT_EXPIRES_IN=1h
+CORS_ORIGINS=http://localhost:3000
+LOG_LEVEL=debug
+```
+
+`DB_SYNC=true` es una comodidad para desarrollo. En producción se recomienda `DB_SYNC=false` y migraciones explícitas.
+
+## Arquitectura
+
+```text
+app.js
+└── src/
+    ├── config/       configuración, Sequelize y logger
+    ├── controllers/  handlers HTTP
+    ├── middleware/   auth y request context
+    ├── models/       modelos Sequelize
+    ├── routes/       surface REST
+    └── utils/        validación pura
+```
+
+## API v1
+
+```text
+POST /api/v1/auth/signup
+POST /api/v1/auth/login
+GET  /api/v1/auth/me
+
+GET    /api/v1/payments
+POST   /api/v1/payments
+GET    /api/v1/payments/:id
+PUT    /api/v1/payments/:id
+DELETE /api/v1/payments/:id
+
+GET /api/v1/users
+```
+
+Detalle de contratos: [`../docs/API.md`](../docs/API.md).
+
+## Testing
+
+```bash
+npm test
+```
+
+Los tests base están diseñados para validar healthcheck, auth boundary, errores y validadores sin depender de una instancia PostgreSQL en CI.
+
+## Seguridad
+
+- JWT Bearer obligatorio para pagos y usuarios.
+- bcrypt para passwords.
+- CORS configurable.
+- límite de payload JSON.
+- validación server-side.
+- errores normalizados.
+- hashes de contraseña excluidos de respuestas.
+- `X-Request-Id` para trazabilidad.
+- variables sensibles fuera de Git.
+
+## Autor
+
+**Alejandro Daniel Di Stefano** — [@Drako01](https://github.com/Drako01)

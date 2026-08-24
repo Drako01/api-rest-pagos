@@ -1,25 +1,16 @@
-import { NavLink } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
-import './Footer.css';
-
-const Footer = () => {
-    
-    const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-
-    useEffect(() => {
-        setCurrentYear(new Date().getFullYear());
-    }, []);
-
-
-
-    return (      
-            
-            <section className='Footer'>             
-                    <p>
-                        &copy; <NavLink className={'LinkToArmoTuSitio'} to={'https://armotusitio.com/'}>ArmoTuSitio.com</NavLink>  | Todos los derechos reservados | Año {currentYear}
-                    </p>                             
-            </section>        
-    )
-}
+const Footer = () => (
+  <footer className="app-footer">
+    <div className="shell footer-content">
+      <div>
+        <strong>PayFlow</strong>
+        <p>Proyecto educativo de ingeniería de software aplicado a una plataforma de pagos.</p>
+      </div>
+      <div className="footer-meta">
+        <span>React · Node.js · Express · PostgreSQL</span>
+        <span>© {new Date().getFullYear()} Alejandro Daniel Di Stefano</span>
+      </div>
+    </div>
+  </footer>
+);
 
 export default Footer;

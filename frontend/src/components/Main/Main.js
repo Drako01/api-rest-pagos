@@ -1,24 +1,24 @@
-import { Routes, Route } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import Index from '../Index/Index';
 import Login from '../Login/Login';
 import Users from '../Users/Users';
 import Pagos from '../Pagos/Pagos';
 import SignUp from '../SignUp/SignUp';
 import DetallePago from '../DetallePago/DetallePago';
+import ProtectedRoute from '../ProtectedRoute';
 
-const Main = () => {
-    return (
-        <main className="App-main">
-            <Routes>
-                <Route path="/" element={<Index greeting={'Inicio'} />} />
-                <Route path="/login" element={<Login greeting={'Ingresar'} />} />
-                <Route path="/users" element={<Users greeting={'Usuarios'} />} />
-                <Route path="/pagos" element={<Pagos greeting={'Pagos'} />} />
-                <Route path="/signup" element={<SignUp greeting={'SignUp'} />} />
-                <Route path="/detalle/:id" element={<DetallePago greeting={'DetallePago'} />} />                
-            </Routes>
-        </main>
-    )
-}
+const Main = () => (
+  <main className="app-main">
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/pagos" element={<ProtectedRoute><Pagos /></ProtectedRoute>} />
+      <Route path="/detalle/:id" element={<ProtectedRoute><DetallePago /></ProtectedRoute>} />
+      <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  </main>
+);
 
 export default Main;
