@@ -1,12 +1,9 @@
-import Navbar from '../Navbar/Navbar'
-import './Header.css'
+import Navbar from '../Navbar/Navbar';
 
-const Header = () => {
-    return (
-        <header className="App-header">           
-            <Navbar />    
-        </header>
-    )
-}
+const Header = () => (
+  <header className="app-header">
+    <Navbar />
+  </header>
+);
 
 export default Header;
