@@ -28,11 +28,21 @@ describe('Payments API contract', () => {
 });
 
 describe('Validation', () => {
-  test('rejects malformed credentials', () => {
-    const result = validateCredentials({ email: 'invalid', password: '123' });
+  test('rejects malformed signup credentials', () => {
+    const result = validateCredentials(
+      { email: 'invalid', password: '123' },
+      { strongPassword: true }
+    );
+
     expect(result.valid).toBe(false);
     expect(result.errors.email).toBeDefined();
     expect(result.errors.password).toBeDefined();
+  });
+
+  test('keeps login validation compatible with existing passwords', () => {
+    const result = validateCredentials({ email: 'legacy@example.com', password: '123' });
+
+    expect(result.valid).toBe(true);
   });
 
   test('accepts a valid payment payload', () => {
