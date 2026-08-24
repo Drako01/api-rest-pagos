@@ -1,39 +1,69 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import './Navbar.css';
-import { useAuth } from '../../context/AuthContext.js';
+import React, { useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const Navbar = () => {
-    const { authenticated, signOut } = useAuth();
+  const { authenticated, userProfile, signOut } = useAuth();
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
-    // Definir los enlaces de navegación según el estado de autenticación
-    const navLinks = authenticated ? [
-        { to: '/', text: 'Inicio' },
-        { to: '/pagos', text: 'Pagos' },
-        { to: '/users', text: 'Usuarios' },
-        { to: '/', text: 'Logout' },
-    ] : [
-        { to: '/', text: 'Inicio' },
-        { to: '/login', text: 'Login' }
-    ];
+  const closeMenu = () => setOpen(false);
+  const logout = () => {
+    signOut();
+    closeMenu();
+    navigate('/');
+  };
 
-    return (
-        <section position="sticky" className="appBar">
-            <Link to="/" className="logo-navbar">
-            </Link>
-            <div className="navLinksDesktop">
-                {navLinks.map((link, index) => (
-                    <Link to={link.to} key={index}>
-                        {link.text === 'Logout' ? (
-                            <button onClick={signOut}>{link.text}</button>
-                        ) : (
-                            link.text
-                        )}
-                    </Link>
-                ))}
-            </div>
-        </section>
-    );
+  return (
+    <nav className="navbar shell" aria-label="Navegación principal">
+      <NavLink to="/" className="brand" onClick={closeMenu}>
+        <span className="brand-mark" aria-hidden="true">P</span>
+        <span>
+          <strong>PayFlow</strong>
+          <small>Payments Console</small>
+        </span>
+      </NavLink>
+
+      <button
+        type="button"
+        className="menu-toggle"
+        aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+
+      <div className={`nav-panel ${open ? 'is-open' : ''}`}>
+        <div className="nav-links">
+          <NavLink to="/" onClick={closeMenu}>Inicio</NavLink>
+          {authenticated && <NavLink to="/pagos" onClick={closeMenu}>Pagos</NavLink>}
+          {authenticated && <NavLink to="/users" onClick={closeMenu}>Usuarios</NavLink>}
+        </div>
+
+        <div className="nav-actions">
+          {authenticated ? (
+            <>
+              <div className="user-chip" title={userProfile?.email}>
+                <span className="status-dot" />
+                <span>{userProfile?.email}</span>
+              </div>
+              <button type="button" className="button button-ghost button-small" onClick={logout}>
+                Cerrar sesión
+              </button>
+            </>
+          ) : (
+            <>
+              <NavLink className="button button-ghost button-small" to="/login" onClick={closeMenu}>Ingresar</NavLink>
+              <NavLink className="button button-primary button-small" to="/signup" onClick={closeMenu}>Crear cuenta</NavLink>
+            </>
+          )}
+        </div>
+      </div>
+    </nav>
+  );
 };
 
 export default Navbar;
