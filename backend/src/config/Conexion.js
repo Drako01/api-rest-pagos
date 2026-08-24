@@ -1,35 +1,36 @@
 import { Sequelize } from 'sequelize';
-import loggers from './logger.js';
 import config from './config.js';
+import loggers from './logger.js';
 
 const sequelize = new Sequelize({
-    dialect: config.db_conexion.dialect,
-    host: config.db_conexion.host,
-    port: config.db_conexion.port,
-    username: config.db_conexion.username,
-    password: config.db_conexion.password,
-    database: config.db_conexion.database,
-    logging: false
+  dialect: config.db.dialect,
+  host: config.db.host,
+  port: config.db.port,
+  username: config.db.username,
+  password: config.db.password,
+  database: config.db.database,
+  logging: config.db.logging ? (message) => loggers.debug(message) : false,
+  pool: {
+    max: 10,
+    min: 0,
+    acquire: 30_000,
+    idle: 10_000
+  }
 });
 
 async function conectar() {
-    try {
-        await sequelize.authenticate();
-        loggers.info('Conexión a la base de datos establecida correctamente.');
-    } catch (error) {
-        loggers.error('Error al conectar a la base de datos:', error.message);
-        process.exit(1); 
-    }
+  await sequelize.authenticate();
+  loggers.info('Database connection established');
+
+  if (config.db.sync) {
+    await sequelize.sync();
+    loggers.warn('DB_SYNC=true: Sequelize schema synchronization executed');
+  }
 }
 
-
 async function desconectar() {
-    try {
-        await sequelize.close();
-        loggers.info('Conexión a la base de datos cerrada correctamente.');
-    } catch (error) {
-        loggers.error('Error al cerrar la conexión a la base de datos:', error);
-    }
+  await sequelize.close();
+  loggers.info('Database connection closed');
 }
 
 export { sequelize, conectar, desconectar };
