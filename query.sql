@@ -1,14 +1,9 @@
--- Database: ventas_e365
+-- PayFlow local database bootstrap
+-- Execute this statement while connected to a PostgreSQL server with permission
+-- to create databases. Sequelize can create the application tables afterwards
+-- when DB_SYNC=true in backend/.env.
 
--- DROP DATABASE IF EXISTS ventas_e365;
-
-CREATE DATABASE ventas_e365
+CREATE DATABASE pagos
     WITH
-    OWNER = postgres
     ENCODING = 'UTF8'
-    LC_COLLATE = 'Spanish_Argentina.1252'
-    LC_CTYPE = 'Spanish_Argentina.1252'
-    LOCALE_PROVIDER = 'libc'
-    TABLESPACE = pg_default
-    CONNECTION LIMIT = -1
-    IS_TEMPLATE = False;.
+    CONNECTION LIMIT = -1;
