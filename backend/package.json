@@ -2,18 +2,20 @@
   "name": "backend-pagos",
   "version": "1.0.0",
   "type": "module",
-  "description": "Backend para E365 - Sistema de Pagos",
+  "description": "API REST profesional para gestión de pagos bancarios",
   "main": "app.js",
   "scripts": {
-    "test": "jest",
-    "dev": "node app",
-    "start": "nodemon app"
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch"
   },
   "author": "Alejandro Daniel Di Stefano",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Drako01/api-rest-pagos.git"
   },
+  "license": "MIT",
   "dependencies": {
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
